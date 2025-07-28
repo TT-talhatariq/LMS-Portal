@@ -1,7 +1,12 @@
+import ManageModules from '@/app/components/adminDashboard/ManageModules';
 import React from 'react';
 
-const ManageModules = () => {
-  return <div>ManageModules</div>;
+const Modules = () => {
+  return (
+    <div>
+      <ManageModules />
+    </div>
+  );
 };
 
-export default ManageModules;
+export default Modules;

@@ -99,6 +99,7 @@ const ManageCourses = () => {
                 <TableCell className="text-right">
                   <Button
                     size="sm"
+                    className="cursor-pointer"
                     variant="destructive"
                     onClick={() => handleDeleteCourse(course.id)}
                   >

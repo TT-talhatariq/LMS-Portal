@@ -117,6 +117,7 @@ const ManageStudent = () => {
                     <Button
                       size="sm"
                       variant="destructive"
+                      className="cursor-pointer"
                       onClick={() => handleDeleteStudent(profile.id)}
                     >
                       Delete
