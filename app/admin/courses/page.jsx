@@ -1,7 +1,12 @@
+import ManageCourses from '@/app/components/adminDashboard/ManageCourse';
 import React from 'react';
 
-const ManageCourses = () => {
-  return <div>ManageCourses</div>;
+const Courses = () => {
+  return (
+    <>
+      <ManageCourses />
+    </>
+  );
 };
 
-export default ManageCourses;
+export default Courses;

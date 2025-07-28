@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import AddStudent from './AddStudent';
-import SearchStudent from './SearchStudent';
+import SearchInput from './SearchInput';
 
 const initialProfiles = [
   {
@@ -46,7 +46,7 @@ const ManageStudent = () => {
     if (!form.studentName.trim()) return;
 
     const newStudent = {
-      id: Date.now().toString(), // Ensure unique id
+      id: Date.now().toString(),
       name: form.studentName.trim(),
       email: form.email.trim(),
       role: 'student',
@@ -70,7 +70,12 @@ const ManageStudent = () => {
         <h2 className="text-lg font-semibold">User Profiles</h2>
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
           <div className="w-full md:w-64">
-            <SearchStudent searchTerm={searchTerm} onSearch={setSearchTerm} />
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search by student name"
+              label="Search Student"
+            />
           </div>
           <div className="w-full md:w-auto">
             <AddStudent onAddStudent={handleAddStudent} />
