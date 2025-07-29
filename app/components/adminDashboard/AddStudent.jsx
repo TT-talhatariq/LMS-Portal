@@ -40,7 +40,7 @@ const AddStudent = ({ onAddStudent }) => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            className="cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
             size="sm"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -50,7 +50,7 @@ const AddStudent = ({ onAddStudent }) => {
         <DialogContent className="[&>button]:cursor-pointer sm:max-w-md bg-white/90 backdrop-blur-md border-slate-200">
           <DialogHeader className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl flex items-center justify-center">
                 <User className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -141,7 +141,7 @@ const AddStudent = ({ onAddStudent }) => {
               </Button>
               <Button
                 type="submit"
-                className="cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Student
