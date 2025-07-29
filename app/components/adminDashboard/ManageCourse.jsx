@@ -74,12 +74,17 @@ const ManageCourses = () => {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Manage Courses
               </h1>
-              <p className="text-slate-600 text-sm">Create and manage your educational courses</p>
+              <p className="text-slate-600 text-sm">
+                Create and manage your educational courses
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <Calendar className="h-4 w-4" />
-            <span>{filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} found</span>
+            <span>
+              {filteredCourses.length} course
+              {filteredCourses.length !== 1 ? 's' : ''} found
+            </span>
           </div>
         </div>
       </div>
@@ -103,23 +108,36 @@ const ManageCourses = () => {
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-200/60">
           <h3 className="text-lg font-semibold text-slate-800">Course List</h3>
-          <p className="text-slate-600 text-sm">Manage all your courses in one place</p>
+          <p className="text-slate-600 text-sm">
+            Manage all your courses in one place
+          </p>
         </div>
-        
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="font-semibold text-slate-700">Title</TableHead>
-                <TableHead className="font-semibold text-slate-700">Description</TableHead>
-                <TableHead className="font-semibold text-slate-700">Created At</TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
+                <TableHead className="font-semibold text-slate-700">
+                  Title
+                </TableHead>
+                <TableHead className="font-semibold text-slate-700">
+                  Description
+                </TableHead>
+                <TableHead className="font-semibold text-slate-700">
+                  Created At
+                </TableHead>
+                <TableHead className="text-right font-semibold text-slate-700">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCourses.length > 0 ? (
                 filteredCourses.map((course) => (
-                  <TableRow key={course.id} className="hover:bg-blue-50/30 transition-colors">
+                  <TableRow
+                    key={course.id}
+                    className="hover:bg-blue-50/30 transition-colors"
+                  >
                     <TableCell className="font-medium text-slate-800">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
@@ -134,7 +152,10 @@ const ManageCourses = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                      <Badge
+                        variant="outline"
+                        className="bg-slate-50 text-slate-600 border-slate-200"
+                      >
                         {new Date(course.created_at).toLocaleDateString()}
                       </Badge>
                     </TableCell>
@@ -159,8 +180,12 @@ const ManageCourses = () => {
                         <BookOpen className="h-8 w-8 text-slate-400" />
                       </div>
                       <div>
-                        <p className="text-slate-600 font-medium">No courses found</p>
-                        <p className="text-slate-500 text-sm">Try adjusting your search or add a new course</p>
+                        <p className="text-slate-600 font-medium">
+                          No courses found
+                        </p>
+                        <p className="text-slate-500 text-sm">
+                          Try adjusting your search or add a new course
+                        </p>
                       </div>
                     </div>
                   </TableCell>

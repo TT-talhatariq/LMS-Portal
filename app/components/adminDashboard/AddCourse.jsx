@@ -36,7 +36,10 @@ const AddCourse = ({ onAddCourse }) => {
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" size="sm">
+          <Button
+            className="cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            size="sm"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Course
           </Button>
@@ -48,8 +51,12 @@ const AddCourse = ({ onAddCourse }) => {
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-semibold text-slate-800">Add New Course</DialogTitle>
-                <p className="text-slate-600 text-sm">Create a new educational course</p>
+                <DialogTitle className="text-xl font-semibold text-slate-800">
+                  Add New Course
+                </DialogTitle>
+                <p className="text-slate-600 text-sm">
+                  Create a new educational course
+                </p>
               </div>
             </div>
           </DialogHeader>
@@ -62,7 +69,10 @@ const AddCourse = ({ onAddCourse }) => {
           >
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                <Label
+                  htmlFor="title"
+                  className="text-sm font-medium text-slate-700 flex items-center gap-2"
+                >
                   <BookOpen className="h-4 w-4" />
                   Course Title
                 </Label>
@@ -76,9 +86,12 @@ const AddCourse = ({ onAddCourse }) => {
                   className="w-full bg-white/80 backdrop-blur-sm border-slate-200 rounded-xl focus:border-blue-300 focus:ring-blue-100 transition-all duration-200"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                <Label
+                  htmlFor="description"
+                  className="text-sm font-medium text-slate-700 flex items-center gap-2"
+                >
                   <FileText className="h-4 w-4" />
                   Course Description
                 </Label>
@@ -93,18 +106,18 @@ const AddCourse = ({ onAddCourse }) => {
                 />
               </div>
             </div>
-            
+
             <DialogFooter className="gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setOpen(false)}
                 className="cursor-pointer border-slate-200 hover:bg-slate-50"
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <Plus className="h-4 w-4 mr-2" />

@@ -98,14 +98,21 @@ const AdminCourses = () => {
                     <BookOpen className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <DialogTitle className="text-xl font-semibold text-slate-800">Add New Course</DialogTitle>
-                    <p className="text-slate-600 text-sm">Create a new educational course</p>
+                    <DialogTitle className="text-xl font-semibold text-slate-800">
+                      Add New Course
+                    </DialogTitle>
+                    <p className="text-slate-600 text-sm">
+                      Create a new educational course
+                    </p>
                   </div>
                 </div>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="title" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <Label
+                    htmlFor="title"
+                    className="text-sm font-medium text-slate-700 flex items-center gap-2"
+                  >
                     <BookOpen className="h-4 w-4" />
                     Course Title
                   </Label>
@@ -126,7 +133,10 @@ const AdminCourses = () => {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleAdd} className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                <Button
+                  onClick={handleAdd}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Course
                 </Button>
@@ -150,7 +160,9 @@ const AdminCourses = () => {
                     <BookOpen className="h-6 w-6 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">{course.title}</h3>
+                    <h3 className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                      {course.title}
+                    </h3>
                   </div>
                 </div>
 
@@ -190,8 +202,12 @@ const AdminCourses = () => {
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BookOpen className="h-8 w-8 text-slate-400" />
               </div>
-              <h3 className="text-slate-600 font-medium mb-2">No courses yet</h3>
-              <p className="text-slate-500 text-sm">Add your first course to get started.</p>
+              <h3 className="text-slate-600 font-medium mb-2">
+                No courses yet
+              </h3>
+              <p className="text-slate-500 text-sm">
+                Add your first course to get started.
+              </p>
             </div>
           )}
         </div>
@@ -209,14 +225,21 @@ const AdminCourses = () => {
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-semibold text-slate-800">Edit Course</DialogTitle>
-                <p className="text-slate-600 text-sm">Update course information</p>
+                <DialogTitle className="text-xl font-semibold text-slate-800">
+                  Edit Course
+                </DialogTitle>
+                <p className="text-slate-600 text-sm">
+                  Update course information
+                </p>
               </div>
             </div>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="edit-title" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <Label
+                htmlFor="edit-title"
+                className="text-sm font-medium text-slate-700 flex items-center gap-2"
+              >
                 <BookOpen className="h-4 w-4" />
                 Course Title
               </Label>
@@ -230,10 +253,17 @@ const AdminCourses = () => {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEditingCourse(null)} className="border-slate-200 hover:bg-slate-50">
+            <Button
+              variant="outline"
+              onClick={() => setEditingCourse(null)}
+              className="border-slate-200 hover:bg-slate-50"
+            >
               Cancel
             </Button>
-            <Button onClick={handleUpdate} className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+            <Button
+              onClick={handleUpdate}
+              className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Edit3 className="h-4 w-4 mr-2" />
               Update Course
             </Button>
