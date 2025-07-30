@@ -73,7 +73,7 @@ const Sidebar = () => {
       </div>
 
       {/* Bottom decoration */}
-      <div className="absolute bottom-6 left-6 right-6">
+      {/* <div className="absolute bottom-6 left-6 right-6">
         <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-4 border border-blue-200/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -85,7 +85,7 @@ const Sidebar = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </aside>
   );
 };

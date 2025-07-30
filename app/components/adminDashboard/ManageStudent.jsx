@@ -127,7 +127,7 @@ const ManageStudent = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-200/60">
             <h3 className="text-lg font-semibold text-slate-800">
               Student Profiles
