@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,51 +13,56 @@ import {
 } from '@/components/ui/table';
 import AddStudent from './AddStudent';
 import SearchInput from './SearchInput';
-import { Users, Calendar, Trash2, Mail, User } from 'lucide-react';
+import { Users, Calendar, Trash2, Mail, User, Loader2 } from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
-
-const initialProfiles = [
-  {
-    id: '1',
-    name: 'Muhammad Afaq',
-    email: 'Vzg2b@example.com',
-    role: 'student',
-    created_at: '2024-06-10T12:34:56.000Z',
-  },
-  {
-    id: '2',
-    name: 'Ali Raza',
-    email: 'H7dEj@example.com',
-    role: 'student',
-    created_at: '2024-06-12T09:20:30.000Z',
-  },
-  {
-    id: '3',
-    name: 'Sara Khan',
-    email: 'TtDl5@example.com',
-    role: 'student',
-    created_at: '2024-06-15T15:45:00.000Z',
-  },
-];
+import { getStudents, addStudent, deleteStudent } from '@/lib/actions/student';
+import { toast } from 'sonner';
 
 const ManageStudent = () => {
-  const [profiles, setProfiles] = useState(initialProfiles);
+  const [profiles, setProfiles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
-  const handleAddStudent = (form) => {
-    if (!form.studentName.trim()) return;
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
-    const newStudent = {
-      id: Date.now().toString(),
-      name: form.studentName.trim(),
-      email: form.email.trim(),
-      role: 'student',
-      created_at: new Date().toISOString(),
-    };
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const students = await getStudents();
+      setProfiles(students || []);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      toast.error(err.message || 'Failed to fetch students');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setProfiles((prev) => [...prev, newStudent]);
+  const handleAddStudent = async (form) => {
+    if (!form.studentName.trim() || !form.email.trim()) {
+      toast.error('Name and email are required');
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await addStudent({
+          name: form.studentName.trim(),
+          email: form.email.trim(),
+          password: form.password.trim(),
+        });
+        toast.success('Student added successfully!');
+        await fetchStudents();
+      } catch (err) {
+        console.error('Error adding student:', err);
+        toast.error(err.message || 'Failed to add student');
+      }
+    });
   };
 
   const handleDeleteClick = (student) => {
@@ -65,12 +70,23 @@ const ManageStudent = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    setProfiles(
-      profiles.filter((student) => student.id !== studentToDelete.id),
-    );
-    setDeleteDialogOpen(false);
-    setStudentToDelete(null);
+  const handleConfirmDelete = async () => {
+    if (!studentToDelete) return;
+
+    startTransition(async () => {
+      try {
+        await deleteStudent(studentToDelete.id);
+        toast.success('Student deleted successfully!');
+        await fetchStudents();
+        setDeleteDialogOpen(false);
+        setStudentToDelete(null);
+      } catch (err) {
+        console.error('Error deleting student:', err);
+        toast.error(err.message || 'Failed to delete student');
+        setDeleteDialogOpen(false);
+        setStudentToDelete(null);
+      }
+    });
   };
 
   const handleCancelDelete = () => {
@@ -79,7 +95,18 @@ const ManageStudent = () => {
   };
 
   const filteredStudents = profiles.filter((profile) =>
-    profile.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    profile.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="h-12 bg-slate-200 rounded-lg"></div>
+        </div>
+      ))}
+    </div>
   );
 
   return (
@@ -104,7 +131,7 @@ const ManageStudent = () => {
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Calendar className="h-4 w-4" />
               <span>
-                {filteredStudents.length} student
+                {loading ? '...' : filteredStudents.length} student
                 {filteredStudents.length !== 1 ? 's' : ''} found
               </span>
             </div>
@@ -122,19 +149,29 @@ const ManageStudent = () => {
                 label="Search Student"
               />
             </div>
-            <AddStudent onAddStudent={handleAddStudent} />
+            <AddStudent onAddStudent={handleAddStudent} disabled={isPending} />
           </div>
         </div>
 
         {/* Table Section */}
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-200/60">
-            <h3 className="text-lg font-semibold text-slate-800">
-              Student Profiles
-            </h3>
-            <p className="text-slate-600 text-sm">
-              View and manage all student accounts
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800">
+                  Student Profiles
+                </h3>
+                <p className="text-slate-600 text-sm">
+                  View and manage all student accounts
+                </p>
+              </div>
+              {(loading || isPending) && (
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{loading ? 'Loading...' : 'Processing...'}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -159,7 +196,13 @@ const ManageStudent = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStudents.length > 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-12">
+                      <LoadingSkeleton />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredStudents.length > 0 ? (
                   filteredStudents.map((profile) => (
                     <TableRow
                       key={profile.id}
@@ -198,20 +241,21 @@ const ManageStudent = () => {
                           variant="outline"
                           className="bg-slate-50 text-slate-600 border-slate-200"
                         >
-                          {new Date(profile.created_at).toLocaleDateString()}
+                          {profile.created_at
+                            ? new Date(profile.created_at).toLocaleDateString()
+                            : 'N/A'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        {profile.role === 'student' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteClick(profile)}
-                            className="hover:bg-red-50 cursor-pointer hover:border-red-200 hover:text-red-600 transition-all duration-200"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteClick(profile)}
+                          disabled={isPending}
+                          className="hover:bg-red-50 cursor-pointer hover:border-red-200 hover:text-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -227,7 +271,9 @@ const ManageStudent = () => {
                             No students found
                           </p>
                           <p className="text-slate-500 text-sm">
-                            Try adjusting your search or add a new student
+                            {searchTerm
+                              ? 'Try adjusting your search or add a new student'
+                              : 'Start by adding your first student'}
                           </p>
                         </div>
                       </div>
@@ -239,6 +285,7 @@ const ManageStudent = () => {
           </div>
         </div>
       </div>
+
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -246,8 +293,9 @@ const ManageStudent = () => {
         description={`Are you sure you want to delete "${studentToDelete?.name}"? This action cannot be undone.`}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        confirmLabel="Delete"
+        confirmLabel={isPending ? 'Deleting...' : 'Delete'}
         cancelLabel="Cancel"
+        disabled={isPending}
       />
     </>
   );

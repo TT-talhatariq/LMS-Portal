@@ -3,31 +3,67 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password });
+    setError('');
+    setLoading(true);
 
-    router.push('/dashboard');
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoading(false);
+      toast.error('Invalid credentials!');
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      setLoading(false);
+      toast.success('Login successful!');
+      if (profile?.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
+    } else {
+      setLoading(false);
+      setError('Could not fetch user profile.');
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <Card className="w-full max-w-md shadow-xl rounded-2xl pt-5">
         <CardTitle className="text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-xl font-bold pb-2">
-          Welcome to Talha's School <span className='text-red-900'>❤️</span>
+          Welcome to Talha's School <span className="text-red-900">❤️</span>
         </CardTitle>
-         <span></span>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid w-full items-center gap-4">
@@ -36,10 +72,11 @@ export default function LoginForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="You@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={loading}
                 />
               </div>
               <div className="flex flex-col space-y-2">
@@ -48,10 +85,11 @@ export default function LoginForm() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder="Enter Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -67,8 +105,15 @@ export default function LoginForm() {
                   </button>
                 </div>
               </div>
-              <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white" type="submit">
-                Sign In
+              {error && (
+                <div className="text-red-600 text-sm text-center">{error}</div>
+              )}
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </div>
           </form>
