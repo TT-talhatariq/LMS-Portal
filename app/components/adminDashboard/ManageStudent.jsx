@@ -15,8 +15,9 @@ import AddStudent from './AddStudent';
 import SearchInput from './SearchInput';
 import { Users, Calendar, Trash2, Mail, User, Loader2 } from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
-import { getStudents, addStudent, deleteStudent } from '@/lib/actions/student';
+import { getStudents, addStudent, deleteStudent } from '@/lib/actions/students';
 import { toast } from 'sonner';
+import LoadingSkeleton from '../common/LoadingSkeleton';
 
 const ManageStudent = () => {
   const [profiles, setProfiles] = useState([]);
@@ -96,17 +97,6 @@ const ManageStudent = () => {
 
   const filteredStudents = profiles.filter((profile) =>
     profile.name?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  // Loading skeleton component
-  const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="h-12 bg-slate-200 rounded-lg"></div>
-        </div>
-      ))}
-    </div>
   );
 
   return (
