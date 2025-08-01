@@ -1,7 +1,14 @@
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
 
 const ConfirmDialog = ({
   open,
@@ -13,6 +20,7 @@ const ConfirmDialog = ({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   loading = false,
+  disabled
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent>
@@ -30,7 +38,7 @@ const ConfirmDialog = ({
           {cancelLabel}
         </Button>
         <Button variant="destructive" onClick={onConfirm} disabled={loading}>
-          {confirmLabel}
+          {confirmLabel} {disabled && <Loader2 className="animate-spin" />}
         </Button>
       </DialogFooter>
     </DialogContent>

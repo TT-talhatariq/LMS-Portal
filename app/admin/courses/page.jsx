@@ -37,20 +37,21 @@ const AdminCourses = () => {
   const [form, setForm] = useState({ title: '' });
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
+  const [loadingCourses, setLoadingCourses] = useState(true); 
+  const [savingCourse, setSavingCourse] = useState(false); 
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        setLoading(true);
+        setLoadingCourses(true);
         const data = await getCourses();
         setCourses(data);
       } catch (error) {
         console.error('Failed to load courses:', error);
         toast.error('Failed to load courses');
       } finally {
-        setLoading(false);
+        setLoadingCourses(false);
       }
     };
     fetchCourses();
@@ -68,59 +69,54 @@ const AdminCourses = () => {
     setIsDialogOpen(true);
   };
 
-  const handleFormSubmit = () => {
-    if (!form.title.trim()) return;
-    let updated;
-    let added;
-    startTransition(async () => {
-      try {
-        if (editingCourse) {
-          updated = await updateCourse(editingCourse.id, {
-            title: form.title.trim(),
-          });
-        } else {
-          added = await addCourse({ title: form.title.trim() });
-        }
-        const updatedCourse = await getCourses();
+const handleFormSubmit = async () => {
+  if (!form.title.trim()) return;
 
-        setCourses(updatedCourse);
-        setIsDialogOpen(false);
-        setForm({ title: '' });
-        setEditingCourse(null);
-
-        if (updated) {
-          toast.success('Course updated successfully');
-        } else if (added) {
-          toast.success('Course added successfully');
-        }
-      } catch (err) {
-        console.error('Save failed:', err);
-        toast.error('Failed to save course');
-      }
-    });
-  };
+  try {
+    setSavingCourse(true);
+    if (editingCourse) {
+      await updateCourse(editingCourse.id, {
+        title: form.title.trim(),
+      });
+      toast.success('Course updated successfully');
+    } else {
+      await addCourse({ title: form.title.trim() });
+      toast.success('Course added successfully');
+    }
+    const updatedCourses = await getCourses();
+    setCourses(updatedCourses);
+    setIsDialogOpen(false);
+    setForm({ title: '' });
+    setEditingCourse(null);
+  } catch (err) {
+    console.error('Save failed:', err);
+    toast.error('Failed to save course');
+  } finally {
+    setSavingCourse(false);
+  }
+};
 
   const handleDeleteClick = (course) => {
     setCourseToDelete(course);
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    startTransition(async () => {
-      try {
-        await deleteCourse(courseToDelete.id);
-        const updated = await getCourses();
-        setCourses(updated);
-        toast.success('Course deleted successfully');
-      } catch (err) {
-        console.error('Delete failed:', err);
-        toast.error('Failed to delete course');
-      } finally {
-        setDeleteDialogOpen(false);
-        setCourseToDelete(null);
-      }
-    });
-  };
+const handleConfirmDelete = async () => {
+  try {
+    setDeletingCourse(true);
+    await deleteCourse(courseToDelete.id);
+    const updated = await getCourses();
+    setCourses(updated);
+    toast.success('Course deleted successfully');
+  } catch (err) {
+    console.error('Delete failed:', err);
+    toast.error('Failed to delete course');
+  } finally {
+    setDeletingCourse(false);
+    setDeleteDialogOpen(false);
+    setCourseToDelete(null);
+  }
+};
 
   const handleCancelDelete = () => {
     setDeleteDialogOpen(false);
@@ -146,12 +142,12 @@ const AdminCourses = () => {
                 </p>
               </div>
             </div>
-            {(loading || isPending) && (
+            {/* {(loading || isPending) && (
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>{loading ? 'Loading...' : 'Processing...'}</span>
               </div>
-            )}
+            )} */}
             <Button
               onClick={openAddDialog}
               className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
@@ -165,7 +161,7 @@ const AdminCourses = () => {
         {/* Course List */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
           <div className="space-y-4">
-            {loading || isPending ? (
+            {loadingCourses ? (
               <LoadingSkeleton />
             ) : courses.length > 0 ? (
               courses.map((course) => (
@@ -203,7 +199,7 @@ const AdminCourses = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDeleteClick(course)}
-                        disabled={isPending}
+                        disabled={deletingCourse}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -273,9 +269,9 @@ const AdminCourses = () => {
               <Button
                 onClick={handleFormSubmit}
                 className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
-                disabled={isPending}
+                disabled={savingCourse}
               >
-                {isPending ? (
+                {savingCourse ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     {editingCourse ? 'Updating...' : 'Creating...'}
@@ -304,9 +300,9 @@ const AdminCourses = () => {
         description={`Are you sure you want to delete "${courseToDelete?.title}"? This action cannot be undone.`}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        confirmLabel={isPending ? 'Deleting...' : 'Delete'}
+        confirmLabel={deletingCourse ? 'Deleting...' : 'Delete'}
         cancelLabel="Cancel"
-        disabled={isPending}
+        disabled={deletingCourse}
       />
     </>
   );
