@@ -61,10 +61,10 @@ const AdminCourseDetail = () => {
   const [form, setForm] = useState({ title: '', priority: '' });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [moduleToDelete, setModuleToDelete] = useState(null);
-setModuleToDelete
-setModuleToDelete
-setModuleToDelete
-setModuleToDelete
+  setModuleToDelete;
+  setModuleToDelete;
+  setModuleToDelete;
+  setModuleToDelete;
   const handleAdd = () => {
     if (form.title.trim() && form.priority) {
       setModules([
