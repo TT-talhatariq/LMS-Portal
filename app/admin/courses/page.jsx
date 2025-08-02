@@ -175,7 +175,9 @@ const AdminCourses = () => {
                       </h3>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Link href={`/admin/courses/${course.id}`}>
+                      <Link
+                        href={`/admin/courses/${course.id}`}
+                      >
                         <Button
                           size="sm"
                           className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"

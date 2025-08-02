@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   BookOpen,
   Home,
@@ -42,15 +42,11 @@ import {
 } from '@/lib/actions/modules';
 import { toast } from 'sonner';
 import LoadingSkeleton from '@/app/components/common/LoadingSkeleton';
+import { getCourseById } from '@/lib/actions/courses';
 
 const AdminCourseDetail = () => {
   const queryClient = useQueryClient();
   const { courseId } = useParams();
-
-  const course = {
-    id: courseId,
-    title: 'React for Beginners',
-  };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
@@ -62,6 +58,11 @@ const AdminCourseDetail = () => {
   const { data: modules = [], isLoading: modulesLoading } = useQuery({
     queryKey: ['modules', courseId],
     queryFn: () => getModules(courseId),
+  });
+
+  const { data: course, isLoading: loadingCourseTitle } = useQuery({
+    queryKey: ['courses', courseId],
+    queryFn: () => getCourseById(courseId),
   });
 
   const resetForm = () => {
@@ -85,7 +86,6 @@ const AdminCourseDetail = () => {
 
   const handleAdd = async () => {
     if (form.title.trim()) {
-      // Auto-increment position: find the highest position and add 1
       const maxPosition =
         modules.length > 0 ? Math.max(...modules.map((m) => m.position)) : 0;
       const newPosition = maxPosition + 1;
@@ -132,7 +132,6 @@ const AdminCourseDetail = () => {
         moduleId: editingModule.id,
         updates: {
           title: form.title.trim(),
-          // Keep the same position when editing
           position: editingModule.position,
         },
       });
@@ -184,9 +183,18 @@ const AdminCourseDetail = () => {
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  {course.title}
-                </h1>
+                {loadingCourseTitle ? (
+                  <div className="h-6 w-40 bg-slate-200 rounded-md animate-pulse" />
+                ) : course ? (
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    {course.title}
+                  </h2>
+                ) : (
+                  <div className="text-sm text-destructive font-medium">
+                    Course title not found
+                  </div>
+                )}
+
                 <p className="text-slate-600 text-sm">Manage course modules</p>
               </div>
             </div>
