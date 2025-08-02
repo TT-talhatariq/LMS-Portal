@@ -13,7 +13,16 @@ import {
 } from '@/components/ui/table';
 import AddStudent from './AddStudent';
 import SearchInput from './SearchInput';
-import { Users, Calendar, Trash2, Mail, User, Loader2 } from 'lucide-react';
+import {
+  Users,
+  Calendar,
+  Trash2,
+  Mail,
+  User,
+  Loader2,
+  BookOpen,
+  Edit3,
+} from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
 import { getStudents, addStudent, deleteStudent } from '@/lib/actions/students';
 import { toast } from 'sonner';
@@ -45,17 +54,23 @@ const ManageStudent = () => {
   };
 
   const handleAddStudent = async (form) => {
-    if (!form.studentName.trim() || !form.email.trim()) {
-      toast.error('Name and email are required');
+    if (!form.studentName?.trim() && !form.name?.trim()) {
+      toast.error('Student name is required');
+      return;
+    }
+
+    if (!form.email?.trim()) {
+      toast.error('Email is required');
       return;
     }
 
     startTransition(async () => {
       try {
         await addStudent({
-          name: form.studentName.trim(),
+          name: form.name || form.studentName.trim(),
           email: form.email.trim(),
-          password: form.password.trim(),
+          password: form.password?.trim() || 'defaultPassword123',
+          courseIds: form.courseIds || [], // Pass array of course IDs
         });
         toast.success('Student added successfully!');
         await fetchStudents();
@@ -99,6 +114,24 @@ const ManageStudent = () => {
     profile.name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  const formatEnrollments = (enrollments) => {
+    if (!enrollments || enrollments.length === 0) {
+      return 'No enrollments';
+    }
+
+    return enrollments
+      .map((enrollment) => enrollment.courses?.title || 'Unknown Course')
+      .join(', ');
+  };
+
+  const getEnrollmentCount = (enrollments) => {
+    return enrollments ? enrollments.length : 0;
+  };
+
+  const openEditDialog = (profile) => {
+    setEditingCourse(profile);
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -114,7 +147,7 @@ const ManageStudent = () => {
                   Manage Students
                 </h1>
                 <p className="text-slate-600 text-sm">
-                  Manage student profiles and accounts
+                  Manage student profiles and course enrollments
                 </p>
               </div>
             </div>
@@ -152,7 +185,8 @@ const ManageStudent = () => {
                   Student Profiles
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  View and manage all student accounts
+                  View and manage all student accounts and their course
+                  enrollments
                 </p>
               </div>
               {(loading || isPending) && (
@@ -178,6 +212,9 @@ const ManageStudent = () => {
                     Role
                   </TableHead>
                   <TableHead className="font-semibold text-slate-700">
+                    Enrollments
+                  </TableHead>
+                  <TableHead className="font-semibold text-slate-700">
                     Created At
                   </TableHead>
                   <TableHead className="text-right font-semibold text-slate-700">
@@ -188,7 +225,7 @@ const ManageStudent = () => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12">
+                    <TableCell colSpan={6} className="text-center py-12">
                       <LoadingSkeleton />
                     </TableCell>
                   </TableRow>
@@ -227,6 +264,28 @@ const ManageStudent = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 text-slate-400" />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-700">
+                              {getEnrollmentCount(profile.enrollments)} course
+                              {getEnrollmentCount(profile.enrollments) !== 1
+                                ? 's'
+                                : ''}
+                            </span>
+                            {profile.enrollments &&
+                              profile.enrollments.length > 0 && (
+                                <span
+                                  className="text-xs text-slate-500 max-w-48 truncate"
+                                  title={formatEnrollments(profile.enrollments)}
+                                >
+                                  {formatEnrollments(profile.enrollments)}
+                                </span>
+                              )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <Badge
                           variant="outline"
                           className="bg-slate-50 text-slate-600 border-slate-200"
@@ -237,6 +296,13 @@ const ManageStudent = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditDialog(profile)}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -251,7 +317,7 @@ const ManageStudent = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12">
+                    <TableCell colSpan={6} className="text-center py-12">
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
                           <Users className="h-8 w-8 text-slate-400" />
