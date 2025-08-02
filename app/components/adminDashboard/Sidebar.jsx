@@ -20,16 +20,16 @@ const navItems = [
     icon: <BookOpen className="h-5 w-5" />,
     href: '/admin/courses/',
   },
-  {
-    label: 'Manage Modules',
-    icon: <Home className="h-5 w-5" />,
-    href: '/admin/modules',
-  },
-  {
-    label: 'Manage Videos',
-    icon: <Video className="h-5 w-5" />,
-    href: '/admin/videos',
-  },
+  // {
+  //   label: 'Manage Modules',
+  //   icon: <Home className="h-5 w-5" />,
+  //   href: '/admin/modules',
+  // },
+  // {
+  //   label: 'Manage Videos',
+  //   icon: <Video className="h-5 w-5" />,
+  //   href: '/admin/videos',
+  // },
 ];
 
 const Sidebar = () => {
