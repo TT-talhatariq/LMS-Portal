@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -29,33 +29,50 @@ import {
 } from '@/lib/actions/courses';
 import { toast } from 'sonner';
 import LoadingSkeleton from '@/app/components/common/LoadingSkeleton';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const AdminCourses = () => {
-  const [courses, setCourses] = useState([]);
+  const queryClient = useQueryClient();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [form, setForm] = useState({ title: '' });
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [loadingCourses, setLoadingCourses] = useState(true); 
-  const [savingCourse, setSavingCourse] = useState(false); 
-  const [deletingCourse, setDeletingCourse] = useState(false);
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        setLoadingCourses(true);
-        const data = await getCourses();
-        setCourses(data);
-      } catch (error) {
-        console.error('Failed to load courses:', error);
-        toast.error('Failed to load courses');
-      } finally {
-        setLoadingCourses(false);
-      }
-    };
-    fetchCourses();
-  }, []);
+  const { data: courses = [], isLoading: loadingCourses } = useQuery({
+    queryKey: ['courses'],
+    queryFn: getCourses,
+  });
+
+  const { mutate: addMutation, isLoading: savingCourse } = useMutation({
+    mutationFn: addCourse,
+    onSuccess: () => {
+      toast.success('Course added successfully');
+      queryClient.invalidateQueries(['courses']);
+    },
+    onError: () => toast.error('Failed to add course'),
+  });
+
+  const { mutate: updateMutation, isLoading: updatingCourse } = useMutation({
+    mutationFn: updateCourse,
+    onSuccess: () => {
+      toast.success('Course updated successfully');
+      queryClient.invalidateQueries(['courses']);
+    },
+    onError: () => toast.error('Failed to update course'),
+  });
+
+  const isSubmitting = savingCourse || updatingCourse;
+
+  const { mutate: deleteMutation, isLoading: deletingCourse } = useMutation({
+    mutationFn: deleteCourse,
+    onSuccess: () => {
+      toast.success('Course deleted successfully');
+      queryClient.invalidateQueries(['courses']);
+    },
+    onError: () => toast.error('Failed to delete course'),
+  });
 
   const openAddDialog = () => {
     setEditingCourse(null);
@@ -69,54 +86,38 @@ const AdminCourses = () => {
     setIsDialogOpen(true);
   };
 
-const handleFormSubmit = async () => {
-  if (!form.title.trim()) return;
+  const handleFormSubmit = async () => {
+    if (!form.title.trim()) return;
 
-  try {
-    setSavingCourse(true);
     if (editingCourse) {
-      await updateCourse(editingCourse.id, {
+      updateMutation({
+        id: editingCourse.id,
         title: form.title.trim(),
       });
-      toast.success('Course updated successfully');
     } else {
-      await addCourse({ title: form.title.trim() });
-      toast.success('Course added successfully');
+      addMutation({
+        title: form.title.trim(),
+      });
     }
-    const updatedCourses = await getCourses();
-    setCourses(updatedCourses);
+
     setIsDialogOpen(false);
     setForm({ title: '' });
     setEditingCourse(null);
-  } catch (err) {
-    console.error('Save failed:', err);
-    toast.error('Failed to save course');
-  } finally {
-    setSavingCourse(false);
-  }
-};
+  };
 
   const handleDeleteClick = (course) => {
     setCourseToDelete(course);
     setDeleteDialogOpen(true);
   };
 
-const handleConfirmDelete = async () => {
-  try {
-    setDeletingCourse(true);
-    await deleteCourse(courseToDelete.id);
-    const updated = await getCourses();
-    setCourses(updated);
-    toast.success('Course deleted successfully');
-  } catch (err) {
-    console.error('Delete failed:', err);
-    toast.error('Failed to delete course');
-  } finally {
-    setDeletingCourse(false);
+  const handleConfirmDelete = async () => {
+    if (courseToDelete) {
+      deleteMutation(courseToDelete.id);
+    }
+
     setDeleteDialogOpen(false);
     setCourseToDelete(null);
-  }
-};
+  };
 
   const handleCancelDelete = () => {
     setDeleteDialogOpen(false);
@@ -142,12 +143,7 @@ const handleConfirmDelete = async () => {
                 </p>
               </div>
             </div>
-            {/* {(loading || isPending) && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{loading ? 'Loading...' : 'Processing...'}</span>
-              </div>
-            )} */}
+
             <Button
               onClick={openAddDialog}
               className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
@@ -201,7 +197,11 @@ const handleConfirmDelete = async () => {
                         onClick={() => handleDeleteClick(course)}
                         disabled={deletingCourse}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deletingCourse ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -269,9 +269,9 @@ const handleConfirmDelete = async () => {
               <Button
                 onClick={handleFormSubmit}
                 className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
-                disabled={savingCourse}
+                disabled={isSubmitting}
               >
-                {savingCourse ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     {editingCourse ? 'Updating...' : 'Creating...'}
