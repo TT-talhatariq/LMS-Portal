@@ -16,9 +16,9 @@ const navItems = [
     href: '/admin/students',
   },
   {
-    label: 'Manage Courses',
+    label: 'Curriculum Builder',
     icon: <BookOpen className="h-5 w-5" />,
-    href: '/admin/courses',
+    href: '/admin/courses/',
   },
   {
     label: 'Manage Modules',
@@ -40,25 +40,29 @@ const Sidebar = () => {
       <div className="p-6">
         <div className="space-y-1">
           {navItems.map((item, index) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              item.href === '/admin/courses/'
+                ? pathname.startsWith('/admin/courses')
+                : pathname === item.href;
+
             return (
               <Link
                 key={index}
                 href={item.href}
                 className={`
-                  group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 hover:scale-[1.02]
-                  ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                      : 'text-slate-600 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-800'
-                  }
-                `}
+        group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 hover:scale-[1.02]
+        ${
+          isActive
+            ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+            : 'text-slate-600 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-800'
+        }
+      `}
               >
                 <div
                   className={`
-                  transition-transform duration-200 group-hover:scale-110
-                  ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600'}
-                `}
+          transition-transform duration-200 group-hover:scale-110
+          ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600'}
+        `}
                 >
                   {item.icon}
                 </div>
