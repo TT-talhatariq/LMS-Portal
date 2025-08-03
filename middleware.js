@@ -1,71 +1,65 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createMiddlewareClient } from './utils/supabase/server';
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll: () => cookies().getAll(),
-        setAll: (values) => values.forEach((v) => cookies().set(v)),
-      },
-    },
-  );
-
-  if (
-    pathname.startsWith('/auth') ||
-    pathname === '/' ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api')
-  ) {
-    return NextResponse.next();
-  }
+  const supabase = createMiddlewareClient(req);
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
-    return NextResponse.redirect(new URL('/auth', req.url));
-  }
+  if (user && (pathname === '/' || pathname.startsWith('/auth'))) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
+    const userRole = profile?.role;
 
-  const userRole = profile?.role;
-
-  if (
-    userRole === 'admin' &&
-    !pathname.startsWith('/admin') &&
-    !pathname.startsWith('/dashboard')
-  ) {
-    return NextResponse.redirect(new URL('/admin', req.url));
-  }
-
-  if (userRole === 'student' && !pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  if (pathname.startsWith('/admin')) {
-    if (userRole !== 'admin') {
+    if (userRole === 'admin') {
+      return NextResponse.redirect(new URL('/admin', req.url));
+    } else {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
-  } else if (pathname.startsWith('/dashboard')) {
-    if (userRole !== 'admin' && userRole !== 'student') {
+  }
+
+  if (
+    !user &&
+    (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))
+  ) {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  if (
+    user &&
+    (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))
+  ) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const userRole = profile?.role;
+
+    if (pathname.startsWith('/admin') && userRole !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
+    if (
+      pathname.startsWith('/dashboard') &&
+      userRole !== 'admin' &&
+      userRole !== 'student'
+    ) {
       return NextResponse.redirect(new URL('/auth', req.url));
     }
-    
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*'],
+  matcher: ['/', '/auth/:path*', '/admin/:path*', '/dashboard/:path*'],
 };

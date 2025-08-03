@@ -207,7 +207,7 @@ const ManageStudent = () => {
               <Calendar className="h-4 w-4" />
               <span>
                 {loadingProfiles ? '...' : filteredStudents.length} student
-                {filteredStudents.length !== 1 ? 's' : ''} found
+                {filteredStudents.length !== 1 ? 's' : ''} 
               </span>
             </div>
           </div>
