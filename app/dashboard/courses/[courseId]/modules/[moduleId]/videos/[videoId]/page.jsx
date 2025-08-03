@@ -46,7 +46,7 @@ const VideoDetail = () => {
   }
 
   const { course, module, video } = data;
-  const bunnyStreamUrl = `https://iframe.videodelivery.net/${video.bunny_video_id}`;
+  const bunnyStreamUrl = `https://iframe.mediadelivery.net/play/473228/${video.bunny_video_id}`;
 
   return (
     <div className="space-y-8">
