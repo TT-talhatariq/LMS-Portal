@@ -179,7 +179,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
         {/* Quick Actions */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm">
           <div className="p-6 border-b border-slate-200/60">

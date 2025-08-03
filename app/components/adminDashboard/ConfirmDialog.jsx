@@ -20,7 +20,7 @@ const ConfirmDialog = ({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   loading = false,
-  disabled
+  disabled,
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent>

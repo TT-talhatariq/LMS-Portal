@@ -332,7 +332,8 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                     default provided)
                   </li>
                   <li>
-                    • <strong>courses</strong>: Talha Jab IDs hongi tb hum isko uncomment kryn gy
+                    • <strong>courses</strong>: Talha Jab IDs hongi tb hum isko
+                    uncomment kryn gy
                     {/* Course titles or IDs,
                     comma-separated (optional) */}
                   </li>

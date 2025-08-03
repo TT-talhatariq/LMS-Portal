@@ -207,7 +207,7 @@ const ManageStudent = () => {
               <Calendar className="h-4 w-4" />
               <span>
                 {loadingProfiles ? '...' : filteredStudents.length} student
-                {filteredStudents.length !== 1 ? 's' : ''} 
+                {filteredStudents.length !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -224,7 +224,7 @@ const ManageStudent = () => {
                 label="Search Student"
               />
             </div>
-            <div className='flex items-center gap-2'>
+            <div className="flex items-center gap-2">
               <CSVUploadStudent
                 onUploadComplete={(results) => {
                   queryClient.invalidateQueries(['profiles']);
