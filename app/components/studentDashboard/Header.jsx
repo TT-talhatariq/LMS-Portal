@@ -14,7 +14,7 @@ const Header = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Logout successfully!');
-    router.push('/auth');
+    router.push('/');
   };
 
   return (
