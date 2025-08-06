@@ -58,22 +58,6 @@ const Sidebar = () => {
             })}
           </nav>
         </div>
-
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-xl p-4 border border-emerald-200/50">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800">
-                  Learning Progress
-                </p>
-                <p className="text-xs text-slate-600">3 courses in progress</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </aside>
     </>
   );

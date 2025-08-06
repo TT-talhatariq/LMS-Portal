@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTrigger,
@@ -23,6 +23,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command';
+import {
   Upload,
   FileText,
   CheckCircle,
@@ -31,11 +43,19 @@ import {
   Download,
   Loader2,
   Users,
+  BookOpen,
+  Check,
+  ChevronDown,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Papa from 'papaparse';
 import { toast } from 'sonner';
-import { addStudent, getCourses } from '@/lib/actions/students';
-import { useQuery } from '@tanstack/react-query';
+import {
+  addStudent,
+  getCourses,
+  testServerAction,
+} from '@/lib/actions/students';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 const CSVUploadStudent = ({ onUploadComplete }) => {
   const [open, setOpen] = useState(false);
@@ -46,11 +66,25 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResults, setUploadResults] = useState([]);
   const [currentStep, setCurrentStep] = useState('upload');
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [openPopover, setOpenPopover] = useState(false);
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [], isLoading: loadingCourses } = useQuery({
     queryKey: ['courses'],
     queryFn: getCourses,
   });
+
+  // Use mutation for adding students
+  const { mutateAsync: addStudentMutation } = useMutation({
+    mutationFn: addStudent,
+  });
+
+  // Test server action mutation
+  const { mutateAsync: testServerActionMutation } = useMutation({
+    mutationFn: testServerAction,
+  });
+
+  console.log(courses);
 
   const handleClose = () => {
     setOpen(false);
@@ -61,6 +95,19 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
     setUploadResults([]);
     setCurrentStep('upload');
     setIsProcessing(false);
+    setSelectedCourses([]);
+  };
+
+  const testServerActionHandler = async () => {
+    try {
+      console.log('Testing server action...');
+      const result = await testServerActionMutation();
+      console.log('Test result:', result);
+      toast.success('Server action test successful!');
+    } catch (error) {
+      console.error('Server action test failed:', error);
+      toast.error('Server action test failed: ' + error.message);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -119,37 +166,6 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
         errors.push('Invalid email format');
       }
 
-      let courseIds = [];
-      // const coursesField = row.courses || row.course_ids || row.courseIds || '';
-
-      // if (coursesField) {
-      //   try {
-      //     let courseList = [];
-
-      //     if (coursesField.startsWith('[') && coursesField.endsWith(']')) {
-      //       courseList = JSON.parse(coursesField);
-      //     } else {
-      //       courseList = coursesField.split(',').map(c => c.trim());
-      //     }
-
-      //     courseIds = courseList.map(courseIdentifier => {
-      //       const courseById = courses.find(c => c.id.toString() === courseIdentifier.toString());
-      //       if (courseById) return courseById.id;
-
-      //       const courseByTitle = courses.find(c =>
-      //         c.title.toLowerCase() === courseIdentifier.toLowerCase()
-      //       );
-      //       if (courseByTitle) return courseByTitle.id;
-
-      //       warnings.push(`Course "${courseIdentifier}" not found`);
-      //       return null;
-      //     }).filter(Boolean);
-
-      //   } catch (e) {
-      //     warnings.push('Invalid course format');
-      //   }
-      // }
-
       return {
         rowIndex: index + 1,
         original: row,
@@ -157,7 +173,7 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
           name,
           email,
           password: 'Student123!',
-          // courseIds
+          courseIds: selectedCourses.map((course) => course.id),
         },
         errors,
         warnings,
@@ -166,6 +182,27 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
     });
 
     setValidatedData(validated);
+  };
+
+  // Re-validate data when selected courses change
+  React.useEffect(() => {
+    if (csvData.length > 0) {
+      validateAndTransformData(csvData);
+    }
+  }, [selectedCourses]);
+
+  const handleCourseSelect = (course) => {
+    const isSelected = selectedCourses.some((sc) => sc.id === course.id);
+
+    if (isSelected) {
+      // Remove course
+      const newSelected = selectedCourses.filter((sc) => sc.id !== course.id);
+      setSelectedCourses(newSelected);
+    } else {
+      // Add course
+      const newSelected = [...selectedCourses, course];
+      setSelectedCourses(newSelected);
+    }
   };
 
   const handleProcessUpload = async () => {
@@ -186,7 +223,12 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
     for (let i = 0; i < validRows.length; i++) {
       const row = validRows[i];
       try {
-        await addStudent(row.validated);
+        console.log('Attempting to create student with data:', row.validated);
+
+        // Use the mutation instead of calling addStudent directly
+        const response = await addStudentMutation(row.validated);
+        console.log('Student creation response:', response);
+
         results.push({
           ...row,
           status: 'success',
@@ -194,12 +236,36 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
         });
         toast.success(`Created student: ${row.validated.name}`);
       } catch (error) {
+        console.error('Error creating student:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          response: error.response,
+          data: error.data,
+          status: error.status,
+        });
+
+        let errorMessage = 'Failed to create student';
+
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.response) {
+          // Server responded with error status
+          errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
+          if (error.response.data) {
+            errorMessage += ` - ${JSON.stringify(error.response.data)}`;
+          }
+        } else if (error.request) {
+          // Request was made but no response received
+          errorMessage = 'No response from server - network error';
+        }
+
         results.push({
           ...row,
           status: 'error',
-          message: error.message || 'Failed to create student',
+          message: errorMessage,
         });
-        toast.error(`Failed to create ${row.validated.name}: ${error.message}`);
+        toast.error(`Failed to create ${row.validated.name}: ${errorMessage}`);
       }
 
       setUploadProgress(((i + 1) / total) * 100);
@@ -222,13 +288,11 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
         name: 'John Doe',
         email: 'john.doe@example.com',
         password: 'SecurePass123',
-        // courses: '1,2,3'
       },
       {
         name: 'Jane Smith',
         email: 'jane.smith@example.com',
         password: 'AnotherPass456',
-        // courses: '1,2,3'
       },
     ];
 
@@ -316,6 +380,87 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                 />
               </div>
 
+              {/* Course Selection */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Select Courses to Enroll Students In
+                </Label>
+                <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      type="button"
+                      className="w-full justify-between bg-white/80 backdrop-blur-sm border-slate-200 rounded-xl focus:border-indigo-300 focus:ring-indigo-100 transition-all duration-200 h-auto min-h-[40px] p-3"
+                    >
+                      <div className="flex flex-wrap gap-1 flex-1 text-left">
+                        {loadingCourses ? (
+                          <div className="flex items-center">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Loading courses...
+                          </div>
+                        ) : selectedCourses.length > 0 ? (
+                          selectedCourses.map((course) => (
+                            <Badge
+                              key={course.id}
+                              variant="secondary"
+                              className="bg-blue-100 text-blue-700 border-blue-200 text-xs"
+                            >
+                              {course.title}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-slate-500">
+                            Select courses (optional)
+                          </span>
+                        )}
+                      </div>
+                      <ChevronDown className="ml-2 h-4 w-4 opacity-50 flex-shrink-0" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search courses..." />
+                      <CommandEmpty>No course found.</CommandEmpty>
+                      <CommandGroup>
+                        {courses.map((course) => {
+                          const isSelected = selectedCourses.some(
+                            (sc) => sc.id === course.id,
+                          );
+                          return (
+                            <CommandItem
+                              key={course.id}
+                              value={course.title}
+                              onSelect={() => handleCourseSelect(course)}
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  isSelected ? 'opacity-100' : 'opacity-0',
+                                )}
+                              />
+                              <div className="flex flex-col">
+                                <span>{course.title}</span>
+                                {course.description && (
+                                  <span className="text-xs text-slate-500 truncate">
+                                    {course.description}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-slate-500">
+                  All imported students will be enrolled in the selected
+                  courses. You can select multiple courses.
+                </p>
+              </div>
+
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
                 <h4 className="font-medium text-indigo-800 mb-2">
                   CSV Format Requirements:
@@ -332,12 +477,28 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                     default provided)
                   </li>
                   <li>
-                    • <strong>courses</strong>: Talha Jab IDs hongi tb hum isko
-                    uncomment kryn gy
-                    {/* Course titles or IDs,
-                    comma-separated (optional) */}
+                    • <strong>Courses</strong>: Selected above will be applied
+                    to all students
                   </li>
                 </ul>
+              </div>
+
+              {/* Test Server Action Button */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-medium text-yellow-800 mb-2">
+                  Debug Tools:
+                </h4>
+                <Button
+                  onClick={testServerActionHandler}
+                  variant="outline"
+                  size="sm"
+                  className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                >
+                  Test Server Action
+                </Button>
+                <p className="text-xs text-yellow-600 mt-2">
+                  Click this to test if server actions are working properly
+                </p>
               </div>
             </div>
           )}
@@ -361,6 +522,14 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                       {invalidRows} Invalid
                     </Badge>
                   )}
+                  {selectedCourses.length > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="bg-green-50 text-green-700 border-green-200"
+                    >
+                      {selectedCourses.length} Course(s) Selected
+                    </Badge>
+                  )}
                 </div>
               </div>
 
@@ -371,7 +540,7 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                       <TableHead>Row</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      {/* <TableHead>Courses</TableHead> */}
+                      <TableHead>Courses</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -384,15 +553,25 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                         <TableCell>{row.rowIndex}</TableCell>
                         <TableCell>{row.validated.name}</TableCell>
                         <TableCell>{row.validated.email}</TableCell>
-                        {/* <TableCell>
-                          {row.validated.courseIds.length > 0 ? (
-                            <span className="text-sm text-slate-600">
-                              {row.validated.courseIds.length} course(s)
-                            </span>
+                        <TableCell>
+                          {selectedCourses.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {selectedCourses.map((course) => (
+                                <Badge
+                                  key={course.id}
+                                  variant="outline"
+                                  className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
+                                >
+                                  {course.title}
+                                </Badge>
+                              ))}
+                            </div>
                           ) : (
-                            <span className="text-sm text-slate-400">None</span>
+                            <span className="text-sm text-slate-400">
+                              No courses selected
+                            </span>
                           )}
-                        </TableCell> */}
+                        </TableCell>
                         <TableCell>
                           <div className="space-y-1">
                             {row.errors.map((error, i) => (
@@ -582,6 +761,7 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
                   setCsvData([]);
                   setValidatedData([]);
                   setUploadResults([]);
+                  setSelectedCourses([]);
                 }}
                 className="bg-gradient-to-r from-indigo-500 to-indigo-500 text-white"
               >
