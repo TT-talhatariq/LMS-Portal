@@ -110,23 +110,22 @@ const MyCourses = () => {
                 key={course.id}
                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 lg:p-4 bg-slate-50 rounded-lg lg:rounded-xl hover:bg-slate-100 transition-colors group"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                    <BookOpen className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
+                <Link href={`/courses/${course.id}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <BookOpen className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">
+                        {course.title}
+                      </h3>
+                      {course.description && (
+                        <p className="text-sm text-slate-600 mt-1">
+                          {course.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-slate-800 text-sm lg:text-base break-words">
-                      {course.title}
-                    </h3>
-                    {course.description && (
-                      <p className="text-xs lg:text-sm text-slate-600 mt-1 break-words line-clamp-2">
-                        {course.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <Link href={`/courses/${course.id}`} className="flex-shrink-0">
                   <Button
                     size="sm"
                     className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-200 text-xs lg:text-sm"
