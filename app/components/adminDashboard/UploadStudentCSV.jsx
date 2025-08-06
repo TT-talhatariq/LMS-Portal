@@ -56,9 +56,11 @@ import {
   getCourses,
   testServerAction,
 } from '@/lib/actions/students';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const CSVUploadStudent = ({ onUploadComplete }) => {
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [csvData, setCsvData] = useState([]);
@@ -78,6 +80,13 @@ const CSVUploadStudent = ({ onUploadComplete }) => {
   // Use mutation for adding students
   const { mutateAsync: addStudentMutation } = useMutation({
     mutationFn: addStudent,
+    onSuccess: () => {
+      toast.success('Student added successfully');
+      queryClient.invalidateQueries(['profiles']);
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Failed to add student');
+    },
   });
 
   // Test server action mutation

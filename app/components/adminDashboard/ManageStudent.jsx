@@ -169,10 +169,6 @@ const ManageStudent = () => {
     setStudentToDelete(null);
   };
 
-  const handleEditClick = (profile) => {
-    setEditingStudent(profile);
-  };
-
   const filteredStudents = profiles.filter((profile) =>
     profile.name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );

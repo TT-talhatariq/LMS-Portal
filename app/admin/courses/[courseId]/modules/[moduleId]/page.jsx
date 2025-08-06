@@ -32,7 +32,7 @@ import {
   deleteVideo,
   getVideos,
   updateVideo,
-} from '@/lib/actions/ videos';
+} from '@/lib/actions/videos';
 import { toast } from 'sonner';
 import LoadingSkeleton from '@/app/components/common/LoadingSkeleton';
 
