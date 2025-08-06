@@ -127,8 +127,10 @@ const AddEditStudent = ({
 
   const handleSubmit = () => {
     const submitData = {
-      ...form,
       name: form.studentName,
+      email: form.email,
+      password: form.password,
+      courseIds: form.courseIds,
     };
 
     if (isEditMode) {
@@ -149,9 +151,15 @@ const AddEditStudent = ({
     setShowPassword(false);
   };
 
-  const isFormValid = form.studentName.trim() && form.email.trim();
-  // For edit mode, password is optional
-  const isSubmitDisabled = !isFormValid || isProcessing;
+  const isFormValid = isEditMode
+    ? form.studentName.trim() && form.email.trim()
+    : form.studentName.trim() && form.email.trim() && form.password.trim();
+
+  const isSubmitDisabled =
+    isProcessing ||
+    !form.studentName.trim() ||
+    !form.email.trim() ||
+    (!isEditMode && !form.password.trim());
 
   const handleCourseSelect = (course) => {
     const isSelected = selectedCourses.some((sc) => sc.id === course.id);
