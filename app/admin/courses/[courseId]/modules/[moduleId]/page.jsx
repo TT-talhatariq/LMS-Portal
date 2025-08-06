@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
 import ConfirmDialog from '@/app/components/adminDashboard/ConfirmDialog';
@@ -32,7 +31,7 @@ import {
   deleteVideo,
   getVideos,
   updateVideo,
-} from '@/lib/actions/ videos';
+} from '@/lib/actions/videos';
 import { toast } from 'sonner';
 import LoadingSkeleton from '@/app/components/common/LoadingSkeleton';
 
