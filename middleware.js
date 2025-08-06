@@ -21,20 +21,20 @@ export async function middleware(req) {
     if (userRole === 'admin') {
       return NextResponse.redirect(new URL('/admin', req.url));
     } else {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      return NextResponse.redirect(new URL('/courses', req.url));
     }
   }
 
   if (
     !user &&
-    (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))
+    (pathname.startsWith('/admin') || pathname.startsWith('/courses'))
   ) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
   if (
     user &&
-    (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))
+    (pathname.startsWith('/admin') || pathname.startsWith('/courses'))
   ) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -45,11 +45,11 @@ export async function middleware(req) {
     const userRole = profile?.role;
 
     if (pathname.startsWith('/admin') && userRole !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      return NextResponse.redirect(new URL('/courses', req.url));
     }
 
     if (
-      pathname.startsWith('/dashboard') &&
+      pathname.startsWith('/courses') &&
       userRole !== 'admin' &&
       userRole !== 'student'
     ) {
@@ -61,5 +61,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/', '/auth/:path*', '/admin/:path*', '/dashboard/:path*'],
+  matcher: ['/', '/auth/:path*', '/admin/:path*', '/courses/:path*'],
 };

@@ -50,7 +50,7 @@ export default function LoginForm() {
       if (profile?.role === 'admin') {
         router.push('/admin');
       } else {
-        router.push('/dashboard');
+        router.push('/courses');
       }
     } else {
       setLoading(false);

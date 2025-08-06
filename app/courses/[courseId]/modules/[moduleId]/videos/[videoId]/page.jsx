@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { getStudentVideoData } from '@/lib/actions/ videos';
+import { getStudentVideoData } from '@/lib/actions/videos';
 
 const VideoDetail = () => {
   const { courseId, moduleId, videoId } = useParams();
@@ -74,7 +74,7 @@ const VideoDetail = () => {
         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-white">
-              <Link href={`/dashboard/courses/${courseId}/modules/${moduleId}`}>
+              <Link href={`/courses/${courseId}/modules/${moduleId}`}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -125,7 +125,7 @@ const VideoDetail = () => {
         <div className="mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href={`/dashboard/courses/${courseId}/modules/${moduleId}`}>
+              <Link href={`/courses/${courseId}/modules/${moduleId}`}>
                 <Button variant="outline" className="hover:bg-slate-50">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Module

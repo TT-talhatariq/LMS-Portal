@@ -2,37 +2,22 @@
 import React from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { BookOpen, Home, ArrowRight } from 'lucide-react';
+import { Play, ArrowLeft, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { getModulesForStudent } from '@/lib/actions/modules';
-import { getCourseById } from '@/lib/actions/courses';
+import { getStudentModuleData } from '@/lib/actions/modules';
 import LoadingSkeleton from '@/app/components/common/LoadingSkeleton';
 
-const CourseDetail = () => {
-  const { courseId } = useParams();
+const ModuleDetail = () => {
+  const { courseId, moduleId } = useParams();
 
-  const {
-    data: course,
-    isLoading: isLoadingCourse,
-    isError: isCourseError,
-  } = useQuery({
-    queryKey: ['courses', courseId],
-    queryFn: () => getCourseById(courseId),
-    enabled: !!courseId,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['studentModuleData', courseId, moduleId],
+    queryFn: () => getStudentModuleData(courseId, moduleId),
+    enabled: !!courseId && !!moduleId,
   });
 
-  const {
-    data: modules,
-    isLoading: isLoadingModules,
-    isError: isModulesError,
-  } = useQuery({
-    queryKey: ['modules', courseId],
-    queryFn: () => getModulesForStudent(courseId),
-    enabled: !!courseId,
-  });
-
-  if (isLoadingCourse || isLoadingModules) {
+  if (isLoading) {
     return (
       <div className="space-y-8">
         <div className="bg-gradient-to-r from-white to-emerald-50/50 rounded-2xl p-6 border border-slate-200/60 shadow-sm animate-pulse">
@@ -46,67 +31,80 @@ const CourseDetail = () => {
     );
   }
 
-  if (isCourseError) {
+  if (isError) {
     return (
       <div className="text-center text-red-500">
-        Error: Failed to load course details.
+        Error: {error.message || 'Failed to load data.'}
       </div>
     );
   }
 
-  if (isModulesError) {
+  if (!data?.module || !data?.course) {
     return (
-      <div className="text-center text-red-500">
-        Error: Failed to load modules.
+      <div className="p-8 text-center text-slate-500">
+        Module or Course not found. Please check the URL.
       </div>
     );
   }
+
+  const { course, module, videos } = data;
 
   return (
     <div className="space-y-8">
-      {/* Course Header */}
       <div className="bg-gradient-to-r from-white to-emerald-50/50 rounded-2xl p-6 border border-slate-200/60 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
-            <BookOpen className="h-5 w-5 text-white" />
+            <Play className="h-5 w-5 text-white" />
           </div>
           <div>
+            <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
+              <BookOpen className="h-4 w-4" />
+              <span>{course.title}</span>
+            </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              {course?.title || 'Course Title'}
+              {module.title}
             </h1>
-            <p className="text-slate-600 text-sm">Course modules</p>
+            <p className="text-slate-600 text-sm">Module videos</p>
           </div>
         </div>
       </div>
 
-      {/* Course Modules */}
+      <div className="flex items-center justify-between">
+        <Link href={`/courses/${courseId}`}>
+          <Button variant="outline" className="hover:bg-slate-50">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Course
+          </Button>
+        </Link>
+      </div>
+
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Modules</h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-4">Videos</h2>
 
         <div className="space-y-4">
-          {modules && modules.length > 0 ? (
-            modules.map((module) => (
+          {videos && videos.length > 0 ? (
+            videos.map((video, index) => (
               <div
-                key={module.id}
+                key={video.id}
                 className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Home className="h-5 w-5 text-emerald-600" />
+                  <Play className="h-5 w-5 text-emerald-600" />
                   <div>
                     <h3 className="font-medium text-slate-800">
-                      Module {module.position}: {module.title}
+                      {index + 1}. {video.title}
                     </h3>
                   </div>
                 </div>
 
                 <Link
-                  href={`/dashboard/courses/${courseId}/modules/${module.id}`}
+                  href={`/courses/${courseId}/modules/${moduleId}/videos/${video.id}`}
                 >
                   <Button
                     size="sm"
                     className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white"
                   >
-                    View Module
+                    Watch Video
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
                 </Link>
@@ -114,7 +112,7 @@ const CourseDetail = () => {
             ))
           ) : (
             <div className="p-4 text-center text-slate-500">
-              No modules have been added to this course yet.
+              No videos have been added to this module yet.
             </div>
           )}
         </div>
@@ -123,4 +121,4 @@ const CourseDetail = () => {
   );
 };
 
-export default CourseDetail;
+export default ModuleDetail;

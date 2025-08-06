@@ -8,30 +8,33 @@ const Breadcrumbs = () => {
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs = [];
 
-  // if (segments[0] === 'dashboard') {
-  //   breadcrumbs.push({ label: 'Dashboard', href: '/dashboard' });
-  // }
+  if (segments[0] === 'courses') {
+    breadcrumbs.push({ label: 'Courses', href: '/courses' });
 
-  if (segments[1] === 'courses') {
-    breadcrumbs.push({ label: 'Courses', href: '/dashboard/courses' });
-
-    if (segments[2]) {
+    const courseId = segments[1];
+    if (courseId) {
       breadcrumbs.push({
         label: 'Course Details',
-        href: `/dashboard/courses/${segments[2]}`,
+        href: `/courses/${courseId}`,
       });
 
-      if (segments[3] === 'modules' && segments[4]) {
-        breadcrumbs.push({
-          label: 'Module',
-          href: `/dashboard/courses/${segments[2]}/modules/${segments[4]}`,
-        });
-
-        if (segments[5] === 'videos' && segments[6]) {
+      if (segments[2] === 'modules') {
+        const moduleId = segments[3];
+        if (moduleId) {
           breadcrumbs.push({
-            label: 'Video',
-            href: `/dashboard/courses/${segments[2]}/modules/${segments[4]}/videos/${segments[6]}`,
+            label: 'Module',
+            href: `/courses/${courseId}/modules/${moduleId}`,
           });
+
+          if (segments[4] === 'videos') {
+            const videoId = segments[5];
+            if (videoId) {
+              breadcrumbs.push({
+                label: 'Video',
+                href: `/courses/${courseId}/modules/${moduleId}/videos/${videoId}`,
+              });
+            }
+          }
         }
       }
     }

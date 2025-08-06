@@ -12,7 +12,7 @@ const navigationItems = [
   {
     label: 'My Courses',
     icon: <BookOpen className="h-5 w-5" />,
-    href: '/dashboard/courses',
+    href: '/courses',
   },
 ];
 
