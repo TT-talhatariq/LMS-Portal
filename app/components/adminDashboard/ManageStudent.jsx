@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +24,15 @@ import {
   Edit3,
 } from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/ui/pagination';
 
 import { toast } from 'sonner';
 import LoadingSkeleton from '../common/LoadingSkeleton';
@@ -36,6 +45,8 @@ import {
 } from '@/lib/actions/students';
 import CSVUploadStudent from './UploadStudentCSV';
 
+const STUDENTS_PER_PAGE = 9;
+
 const ManageStudent = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,17 +54,48 @@ const ManageStudent = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingStudentId, setDeletingStudentId] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  const { data: profiles = [], isLoading: loadingProfiles } = useQuery({
-    queryKey: ['profiles'],
-    queryFn: getStudents,
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); 
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  const { 
+    data: studentsData, 
+    isLoading: loadingProfiles,
+    error: studentsError 
+  } = useQuery({
+    queryKey: ['profiles', currentPage, debouncedSearchTerm, STUDENTS_PER_PAGE],
+    queryFn: () => getStudents({
+      page: currentPage,
+      limit: STUDENTS_PER_PAGE,
+      searchTerm: debouncedSearchTerm
+    }),
+    keepPreviousData: true, 
   });
+
+  const profiles = studentsData?.data || [];
+  const totalCount = studentsData?.count || 0;
+  const totalPages = studentsData?.totalPages || 0;
+  const hasNextPage = studentsData?.hasNextPage || false;
+  const hasPreviousPage = studentsData?.hasPreviousPage || false;
 
   const { mutate: addStudentMutation, isPending: savingStudent } = useMutation({
     mutationFn: addStudent,
     onSuccess: () => {
       toast.success('Student added successfully');
-      queryClient.invalidateQueries(['profiles']);
+      queryClient.invalidateQueries({
+        queryKey: ['profiles']
+      });
     },
     onError: (error) => {
       toast.error(error?.message || 'Failed to add student');
@@ -65,7 +107,9 @@ const ManageStudent = () => {
       mutationFn: ({ id, data }) => updateStudent(id, data),
       onSuccess: () => {
         toast.success('Student updated successfully');
-        queryClient.invalidateQueries(['profiles']);
+        queryClient.invalidateQueries({
+          queryKey: ['profiles']
+        });
         setEditingStudent(null);
       },
       onError: (error) => {
@@ -81,8 +125,13 @@ const ManageStudent = () => {
       },
       onSuccess: () => {
         toast.success('Student deleted successfully');
-        queryClient.invalidateQueries(['profiles']);
+        queryClient.invalidateQueries({
+          queryKey: ['profiles']
+        });
         setDeletingStudentId(null);
+        if (profiles.length === 1 && currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
       },
       onError: (error) => {
         toast.error(error?.message || 'Failed to delete student');
@@ -138,7 +187,6 @@ const ManageStudent = () => {
       courseIds: form.courseIds || [],
     };
 
-    // Only include password if it's provided (not empty)
     if (form.password?.trim()) {
       updateData.password = form.password.trim();
     }
@@ -169,14 +217,6 @@ const ManageStudent = () => {
     setStudentToDelete(null);
   };
 
-  const handleEditClick = (profile) => {
-    setEditingStudent(profile);
-  };
-
-  const filteredStudents = profiles.filter((profile) =>
-    profile.name?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
   const formatEnrollments = (enrollments) =>
     !enrollments || enrollments.length === 0
       ? 'No enrollments'
@@ -184,10 +224,86 @@ const ManageStudent = () => {
 
   const getEnrollmentCount = (enrollments) => enrollments?.length || 0;
 
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+  };
+
+  const renderPaginationItems = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages > 0) {
+      pages.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            onClick={() => handlePageChange(1)}
+            isActive={currentPage === 1}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2) + 1);
+    let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxPagesToShow / 2) - 1);
+
+    if (currentPage <= Math.floor(maxPagesToShow / 2) + 1) {
+      endPage = Math.min(totalPages - 1, maxPagesToShow);
+    }
+    if (currentPage >= totalPages - Math.floor(maxPagesToShow / 2)) {
+      startPage = Math.max(2, totalPages - maxPagesToShow + 1);
+    }
+
+    if (startPage > 2) {
+      pages.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>,
+      );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            onClick={() => handlePageChange(i)}
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    if (endPage < totalPages - 1) {
+      pages.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>,
+      );
+    }
+
+    if (totalPages > 1 && !pages.some(p => p.key === totalPages.toString())) {
+      pages.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            onClick={() => handlePageChange(totalPages)}
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    return pages;
+  };
+
   return (
     <>
       <div className="space-y-6">
-        {/* Header */}
         <div className="bg-gradient-to-r from-white to-green-50/50 rounded-2xl p-6 border border-slate-200/60 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -206,14 +322,18 @@ const ManageStudent = () => {
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Calendar className="h-4 w-4" />
               <span>
-                {loadingProfiles ? '...' : filteredStudents.length} student
-                {filteredStudents.length !== 1 ? 's' : ''}
+                {loadingProfiles ? '...' : totalCount} student
+                {totalCount !== 1 ? 's' : ''}
+                {debouncedSearchTerm && (
+                  <span className="ml-1 text-blue-600">
+                    (filtered)
+                  </span>
+                )}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Controls */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex-1 max-w-md">
@@ -227,7 +347,9 @@ const ManageStudent = () => {
             <div className="flex items-center gap-2">
               <CSVUploadStudent
                 onUploadComplete={(results) => {
-                  queryClient.invalidateQueries(['profiles']);
+                  queryClient.invalidateQueries({
+                    queryKey: ['profiles']
+                  });
                   const successCount = results.filter(
                     (r) => r.status === 'success',
                   ).length;
@@ -246,7 +368,6 @@ const ManageStudent = () => {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-200/60">
             <div className="flex items-center justify-between">
@@ -255,8 +376,12 @@ const ManageStudent = () => {
                   Student Profiles
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  View and manage all student accounts and their course
-                  enrollments
+                  View and manage all student accounts and their course enrollments
+                  {totalPages > 1 && (
+                    <span className="ml-1">
+                      (Page {currentPage} of {totalPages})
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -276,12 +401,12 @@ const ManageStudent = () => {
               <TableBody>
                 {loadingProfiles ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <LoadingSkeleton />
+                    <TableCell colSpan={5} className="text-center py-12">
+                      <LoadingSkeleton count={5} />
                     </TableCell>
                   </TableRow>
-                ) : filteredStudents.length > 0 ? (
-                  filteredStudents.map((profile) => (
+                ) : profiles.length > 0 ? (
+                  profiles.map((profile) => (
                     <TableRow
                       key={profile.id}
                       className="hover:bg-green-50/30 transition-colors"
@@ -364,7 +489,7 @@ const ManageStudent = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={5} className="text-center py-12">
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
                           <Users className="h-8 w-8 text-slate-400" />
@@ -386,6 +511,30 @@ const ManageStudent = () => {
               </TableBody>
             </Table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={!hasPreviousPage}
+                      className={!hasPreviousPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  {renderPaginationItems()}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={!hasNextPage}
+                      className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       </div>
 
