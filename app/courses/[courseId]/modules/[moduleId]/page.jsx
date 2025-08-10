@@ -78,8 +78,8 @@ const ModuleDetail = () => {
       {/* Back to Course Button */}
       <div className="flex items-center justify-between">
         <Link href={`/courses/${courseId}`}>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="hover:bg-slate-50 text-sm lg:text-base px-3 lg:px-4"
             size="sm"
           >
@@ -92,7 +92,9 @@ const ModuleDetail = () => {
 
       {/* Videos Section */}
       <div className="bg-white/80 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-200/60 shadow-sm">
-        <h2 className="text-lg lg:text-xl font-semibold text-slate-800 mb-4">Videos</h2>
+        <h2 className="text-lg lg:text-xl font-semibold text-slate-800 mb-4">
+          Videos
+        </h2>
 
         <div className="space-y-3 lg:space-y-4">
           {videos && videos.length > 0 ? (

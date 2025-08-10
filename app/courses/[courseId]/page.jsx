@@ -81,7 +81,9 @@ const CourseDetail = () => {
 
       {/* Course Modules */}
       <div className="bg-white/80 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-slate-200/60 shadow-sm">
-        <h2 className="text-lg lg:text-xl font-semibold text-slate-800 mb-4">Modules</h2>
+        <h2 className="text-lg lg:text-xl font-semibold text-slate-800 mb-4">
+          Modules
+        </h2>
 
         <div className="space-y-3 lg:space-y-4">
           {modules && modules.length > 0 ? (

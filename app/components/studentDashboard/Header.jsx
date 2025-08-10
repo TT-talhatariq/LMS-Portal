@@ -1,6 +1,12 @@
 'use client';
 import { useProfile } from '@/hooks/useProfile';
-import { GraduationCap, LayoutDashboard, LogOut, User, Menu } from 'lucide-react';
+import {
+  GraduationCap,
+  LayoutDashboard,
+  LogOut,
+  User,
+  Menu,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
