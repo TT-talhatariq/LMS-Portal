@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Home, Users, BookOpen, Video, LayoutDashboard } from 'lucide-react';
+import { Users, BookOpen, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -20,16 +20,6 @@ const navItems = [
     icon: <BookOpen className="h-5 w-5" />,
     href: '/admin/courses/',
   },
-  // {
-  //   label: 'Manage Modules',
-  //   icon: <Home className="h-5 w-5" />,
-  //   href: '/admin/modules',
-  // },
-  // {
-  //   label: 'Manage Videos',
-  //   icon: <Video className="h-5 w-5" />,
-  //   href: '/admin/videos',
-  // },
 ];
 
 const Sidebar = () => {
