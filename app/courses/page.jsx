@@ -99,23 +99,23 @@ const MyCourses = () => {
                 key={course.id}
                 className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors group"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <BookOpen className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-800">
-                      {course.title}
-                    </h3>
-                    {course.description && (
-                      <p className="text-sm text-slate-600 mt-1">
-                        {course.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
                 <Link href={`/courses/${course.id}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <BookOpen className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">
+                        {course.title}
+                      </h3>
+                      {course.description && (
+                        <p className="text-sm text-slate-600 mt-1">
+                          {course.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   <Button
                     size="sm"
                     className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-200"
