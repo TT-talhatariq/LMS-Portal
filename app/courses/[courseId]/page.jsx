@@ -90,21 +90,21 @@ const CourseDetail = () => {
             modules.map((module) => (
               <div
                 key={module.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 lg:p-4 bg-slate-50 rounded-lg lg:rounded-xl hover:bg-slate-100 transition-colors"
+                className=" bg-slate-50 rounded-lg lg:rounded-xl hover:bg-slate-100 transition-colors"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <Home className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-slate-800 text-sm lg:text-base break-words">
-                      Module {module.position}: {module.title}
-                    </h3>
-                  </div>
-                </div>
-
                 <Link
                   href={`/courses/${courseId}/modules/${module.id}`}
-                  className="flex-shrink-0"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 lg:p-4"
                 >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Home className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-slate-800 text-sm lg:text-base break-words">
+                        Module {module.position}: {module.title}
+                      </h3>
+                    </div>
+                  </div>
+
                   <Button
                     size="sm"
                     className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs lg:text-sm"
