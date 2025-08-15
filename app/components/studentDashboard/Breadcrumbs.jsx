@@ -1,41 +1,52 @@
 'use client';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const Breadcrumbs = () => {
+const Breadcrumbs = ({ courseId }) => {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs = [];
 
+  // Getting Data Form Pre-Fetched Query
+  const { data } = useQuery({
+    queryKey: ['courseData', courseId],
+    queryFn: () => getCourseBreadCrumbs(courseId),
+    staleTime: Infinity,
+  });
+
+  /// Course-Bread-Crumbs
   if (segments[0] === 'courses') {
     breadcrumbs.push({ label: 'Courses', href: '/courses' });
 
     const courseId = segments[1];
-    if (courseId) {
+    if (!courseId) return;
+
+    breadcrumbs.push({
+      label: data[0].title,
+      href: `/courses/${courseId}`,
+    });
+
+    if (segments[2] === 'modules') {
+      const moduleId = segments[3];
+      if (!moduleId) return;
+
+      const module = data[0].modules.find((m) => m.id === moduleId);
       breadcrumbs.push({
-        label: 'Course Details',
-        href: `/courses/${courseId}`,
+        label: module?.title || 'Module',
+        href: `/courses/${courseId}/modules/${moduleId}`,
       });
 
-      if (segments[2] === 'modules') {
-        const moduleId = segments[3];
-        if (moduleId) {
-          breadcrumbs.push({
-            label: 'Module',
-            href: `/courses/${courseId}/modules/${moduleId}`,
-          });
+      if (segments[4] === 'videos') {
+        const videoId = segments[5];
+        if (!videoId) return;
 
-          if (segments[4] === 'videos') {
-            const videoId = segments[5];
-            if (videoId) {
-              breadcrumbs.push({
-                label: 'Video',
-                href: `/courses/${courseId}/modules/${moduleId}/videos/${videoId}`,
-              });
-            }
-          }
-        }
+        const video = module?.videos.find((v) => v.id === videoId);
+        breadcrumbs.push({
+          label: video?.title || 'Video',
+          href: `/courses/${courseId}/modules/${moduleId}/videos/${videoId}`,
+        });
       }
     }
   }

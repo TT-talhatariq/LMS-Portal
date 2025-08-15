@@ -1,7 +1,6 @@
 import React from 'react';
 import Header from '../components/studentDashboard/Header';
 import Sidebar from '../components/studentDashboard/Sidebar';
-import Breadcrumbs from '../components/studentDashboard/Breadcrumbs';
 
 export default function StudentLayout({ children }) {
   return (
@@ -10,12 +9,7 @@ export default function StudentLayout({ children }) {
       <div className="flex flex-1">
         <Sidebar />
         <main className="flex-1 p-6">
-          <div>
-            <div className="mb-6">
-              <Breadcrumbs />
-            </div>
-            {children}
-          </div>
+          <div>{children}</div>
         </main>
       </div>
     </div>

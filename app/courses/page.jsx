@@ -79,6 +79,8 @@ const MyCourses = () => {
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-teal-500/20"></div>
       </div>
 
+      <h4 className="font-semibold text-xl ms-4">Courses</h4>
+
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
         <div className="space-y-4">
           {isLoading ? (
