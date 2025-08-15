@@ -60,7 +60,7 @@ const ManageStudent = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500); 
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -69,18 +69,19 @@ const ManageStudent = () => {
     setCurrentPage(1);
   }, [debouncedSearchTerm]);
 
-  const { 
-    data: studentsData, 
+  const {
+    data: studentsData,
     isLoading: loadingProfiles,
-    error: studentsError 
+    error: studentsError,
   } = useQuery({
     queryKey: ['profiles', currentPage, debouncedSearchTerm, STUDENTS_PER_PAGE],
-    queryFn: () => getStudents({
-      page: currentPage,
-      limit: STUDENTS_PER_PAGE,
-      searchTerm: debouncedSearchTerm
-    }),
-    keepPreviousData: true, 
+    queryFn: () =>
+      getStudents({
+        page: currentPage,
+        limit: STUDENTS_PER_PAGE,
+        searchTerm: debouncedSearchTerm,
+      }),
+    keepPreviousData: true,
   });
 
   const profiles = studentsData?.data || [];
@@ -94,7 +95,7 @@ const ManageStudent = () => {
     onSuccess: () => {
       toast.success('Student added successfully');
       queryClient.invalidateQueries({
-        queryKey: ['profiles']
+        queryKey: ['profiles'],
       });
     },
     onError: (error) => {
@@ -108,7 +109,7 @@ const ManageStudent = () => {
       onSuccess: () => {
         toast.success('Student updated successfully');
         queryClient.invalidateQueries({
-          queryKey: ['profiles']
+          queryKey: ['profiles'],
         });
         setEditingStudent(null);
       },
@@ -126,7 +127,7 @@ const ManageStudent = () => {
       onSuccess: () => {
         toast.success('Student deleted successfully');
         queryClient.invalidateQueries({
-          queryKey: ['profiles']
+          queryKey: ['profiles'],
         });
         setDeletingStudentId(null);
         if (profiles.length === 1 && currentPage > 1) {
@@ -246,8 +247,14 @@ const ManageStudent = () => {
       );
     }
 
-    let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2) + 1);
-    let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxPagesToShow / 2) - 1);
+    let startPage = Math.max(
+      2,
+      currentPage - Math.floor(maxPagesToShow / 2) + 1,
+    );
+    let endPage = Math.min(
+      totalPages - 1,
+      currentPage + Math.floor(maxPagesToShow / 2) - 1,
+    );
 
     if (currentPage <= Math.floor(maxPagesToShow / 2) + 1) {
       endPage = Math.min(totalPages - 1, maxPagesToShow);
@@ -285,7 +292,7 @@ const ManageStudent = () => {
       );
     }
 
-    if (totalPages > 1 && !pages.some(p => p.key === totalPages.toString())) {
+    if (totalPages > 1 && !pages.some((p) => p.key === totalPages.toString())) {
       pages.push(
         <PaginationItem key={totalPages}>
           <PaginationLink
@@ -325,9 +332,7 @@ const ManageStudent = () => {
                 {loadingProfiles ? '...' : totalCount} student
                 {totalCount !== 1 ? 's' : ''}
                 {debouncedSearchTerm && (
-                  <span className="ml-1 text-blue-600">
-                    (filtered)
-                  </span>
+                  <span className="ml-1 text-blue-600">(filtered)</span>
                 )}
               </span>
             </div>
@@ -348,7 +353,7 @@ const ManageStudent = () => {
               <CSVUploadStudent
                 onUploadComplete={(results) => {
                   queryClient.invalidateQueries({
-                    queryKey: ['profiles']
+                    queryKey: ['profiles'],
                   });
                   const successCount = results.filter(
                     (r) => r.status === 'success',
@@ -376,7 +381,8 @@ const ManageStudent = () => {
                   Student Profiles
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  View and manage all student accounts and their course enrollments
+                  View and manage all student accounts and their course
+                  enrollments
                   {totalPages > 1 && (
                     <span className="ml-1">
                       (Page {currentPage} of {totalPages})
@@ -520,7 +526,11 @@ const ManageStudent = () => {
                     <PaginationPrevious
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={!hasPreviousPage}
-                      className={!hasPreviousPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      className={
+                        !hasPreviousPage
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer'
+                      }
                     />
                   </PaginationItem>
                   {renderPaginationItems()}
@@ -528,7 +538,11 @@ const ManageStudent = () => {
                     <PaginationNext
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={!hasNextPage}
-                      className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      className={
+                        !hasNextPage
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer'
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>
