@@ -32,7 +32,7 @@ const Header = () => {
             <div className="flex items-center gap-4">
               {/* Visit Dashabord */}
               <Button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/courses')}
                 variant="ghost"
                 className="text-slate-700 hover:bg-indigo-50 flex items-center gap-2 px-4 py-2"
               >

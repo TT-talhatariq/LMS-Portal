@@ -29,7 +29,7 @@ import { getModuleById } from '@/lib/actions/modules';
 import {
   addVideo,
   deleteVideo,
-  getVideos,
+  getVideosByModule,
   updateVideo,
 } from '@/lib/actions/videos';
 import { toast } from 'sonner';
@@ -57,7 +57,7 @@ const AdminModuleDetail = () => {
 
   const { data: videos = [], isLoading: videosLoading } = useQuery({
     queryKey: ['videos', moduleId],
-    queryFn: () => getVideos(moduleId),
+    queryFn: () => getVideosByModule(moduleId),
   });
 
   const openAddDialog = () => {
